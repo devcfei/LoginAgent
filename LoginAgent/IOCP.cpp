@@ -283,7 +283,30 @@ HRESULT IOCP::PostRecv(IOCP_CONNECTION *pConn)
 }
 HRESULT IOCP::PostSend(IOCP_CONNECTION *pConn)
 {
+    int r;
     HRESULT hr = S_OK;
+    //DWORD dwBytes = 0;
+    DWORD dwFlags = 0;
+
+    r = WSASend(
+        pConn->Socket,
+        &pConn->wsabuf,
+        1,
+        NULL,
+        dwFlags,
+        &pConn->wsaol,
+        NULL);
+    if (r == SOCKET_ERROR)
+    {
+        DWORD dwErr = WSAGetLastError();
+        if (WSA_IO_PENDING != dwErr)
+        {
+            hr = E_FAIL;
+            // TODO: shutdown client
+
+        }
+    }
+
     return hr;
 }
 

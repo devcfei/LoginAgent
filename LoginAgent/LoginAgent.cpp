@@ -136,6 +136,7 @@ HRESULT LoginAgent::ReadConfig(LPCTSTR lpszCfgFile)
     GetPrivateProfileString(_T("LOGIN_DB"), _T("CATALOG"), _T("ASD"), szDBCatalog_, 64, lpszCfgFile);
 
     // [SERVER_GROUP]
+    vecServerGroup_.clear();
     nServerGroup_ = GetPrivateProfileInt(_T("SERVER_GROUP"), _T("COUNT"), 1, lpszCfgFile);
     for (UINT i = 0; i < nServerGroup_; ++i)
     {
@@ -209,6 +210,72 @@ HRESULT LoginAgent::WriteConfig(LPCTSTR lpszCfgFile)
         StringCchPrintf(key, 32, _T("NAME%d"), i);
         WritePrivateProfileString(_T("SERVER_GROUP"), key, vecServerGroup_[i].name, lpszCfgFile);
     }
+
+    return hr;
+}
+
+
+
+HRESULT LoginAgent::OnRecv(IOCP_CONNECTION* pConn)
+{
+    HRESULT hr = S_OK;
+
+
+    PACKET_HEADER* hdr = (PACKET_HEADER*)pConn->buffer;
+
+    switch (hdr->Cmd)
+    {
+    case C2LA_CMD_E0_LOGIN_REQUEST:
+    {
+        PACKET_LA2C_LOGIN_RESP* pkt = (PACKET_LA2C_LOGIN_RESP*)pConn->buffer;
+        ZeroMemory(pConn->buffer, sizeof(PACKET_LA2C_LOGIN_RESP));
+        pkt->Header.Size = sizeof(PACKET_LA2C_LOGIN_RESP);
+        pkt->Header.Ctrl = 1;
+        pkt->Header.Cmd = LA2C_CMD_E1_LOGIN_RESP;
+        pkt->Header.Uid = 0x2A4;
+        pkt->count = 1;
+
+		// convert unicode to MCSB
+		int n = WideCharToMultiByte(CP_ACP, 0, vecServerGroup_[0].name, -1, 0, 0, 0, 0);
+		char str[17];
+		WideCharToMultiByte(CP_ACP, 0, vecServerGroup_[0].name, -1, str, n, 0, 0);
+
+		StringCchCopyA(pkt->name, 17, str);
+
+        // TODO: check ZA
+		StringCchCopyA(pkt->online, 0x51, "ONLINE");
+
+		PostSend(pConn);
+
+        break;
+    }
+    case C2LA_CMD_E1_QUERY_SERVER:
+    {
+        PACKET_LA2C_SERVER_CONFIG* pkt = (PACKET_LA2C_SERVER_CONFIG*)pConn->buffer;
+        ZeroMemory(pConn->buffer, sizeof(PACKET_LA2C_SERVER_CONFIG));
+        pkt->Header.Size = sizeof(PACKET_LA2C_SERVER_CONFIG);
+        pkt->Header.Ctrl = 1;
+        pkt->Header.Cmd = LA2C_CMD_E2_SERVER_CFG;
+        pkt->Header.Uid = 0x2A4;
+        
+        StringCchCopyA(pkt->ip, 16, "127.0.0.1");
+        pkt->port = 3550;
+
+        PostSend(pConn);
+
+        break;
+    }
+
+    }
+
+    
+
+    return hr;
+}
+
+HRESULT LoginAgent::OnSend(IOCP_CONNECTION* pConn)
+{
+    HRESULT hr = S_OK;
 
     return hr;
 }

@@ -12,6 +12,9 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 
+// ATL
+#include <atlconv.h>
+
 // Socket
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -54,6 +57,7 @@ namespace std
 #include "resource.h"
 
 // Private modules
+#include "Packet.h"
 #include "Utils.h"
 #include "Event.h"
 #include "Log.h"

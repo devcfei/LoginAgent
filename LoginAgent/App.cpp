@@ -19,6 +19,8 @@ HRESULT App::Initialize(HINSTANCE hInstance)
 
     // initialize LoginAgent
     hr = LA_.Initialize(szCfgFile);
+    // lock
+    InitializeCriticalSection(&csLog_);
 
     return hr;
 }
@@ -176,6 +178,8 @@ INT_PTR App::OnCommand(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 HRESULT App::PrintMessage(LPCTSTR fmt, ...)
 {
     HRESULT hr;
+    CCSLock lock(&csLog_);
+
     TCHAR szMessageBuffer[1024] = { 0 };
     va_list valist;
     va_start(valist, fmt);
@@ -188,9 +192,11 @@ HRESULT App::PrintMessage(LPCTSTR fmt, ...)
 
     logMsg_ += szMessageBuffer;
     logMsg_ += _T("\r\n");
+    dwLineCount_++;
 
     HWND hWndEditLog = GetDlgItem(hDlg_, IDC_EDIT_LOG);
     SetWindowText(hWndEditLog, logMsg_.c_str());
+    SendMessage(hWndEditLog, EM_LINESCROLL, 0, dwLineCount_);
 
     return hr;
 }

@@ -13,6 +13,10 @@ public:
     HRESULT Start();
     HRESULT Stop();
 
+    virtual HRESULT OnRecv(IOCP_CONNECTION* pConn);
+    virtual HRESULT OnSend(IOCP_CONNECTION* pConn);
+
+
 private:
     HRESULT InitializeDefaultConfig();
     HRESULT ReadConfig(LPCTSTR lpszCfgFile);

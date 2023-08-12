@@ -140,6 +140,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="IOCP.h" />
     <ClInclude Include="LoginAgent.h" />
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

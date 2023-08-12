@@ -42,6 +42,10 @@ public:
 
     virtual HRESULT OnRecv(IOCP_CONNECTION* pConn);
     virtual HRESULT OnSend(IOCP_CONNECTION* pConn);
+
+    HRESULT PostRecv(IOCP_CONNECTION* pConn);
+    HRESULT PostSend(IOCP_CONNECTION* pConn);
+
 private:
     WORD wPort_;
 
@@ -64,11 +68,7 @@ private:
 
 
 private:
-
-
     HRESULT PostAcceptEx(IOCP_CONNECTION *pConn);
-    HRESULT PostRecv(IOCP_CONNECTION *pConn);
-    HRESULT PostSend(IOCP_CONNECTION *pConn);
 
 
 private:

@@ -21,7 +21,11 @@ private:
     HINSTANCE hInst_;
     HWND    hDlg_;
     HBRUSH hbrBkgnd_;
+   
+    // Log
+    CRITICAL_SECTION csLog_;
     std::tstring logMsg_;
+    DWORD dwLineCount_ = 0;;
 
     static INT_PTR CALLBACK DialogProc(HWND, UINT, WPARAM, LPARAM);
     INT_PTR OnInitDialog(HWND, UINT, WPARAM, LPARAM);

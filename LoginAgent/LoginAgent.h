@@ -2,7 +2,7 @@
 
 
 
-class LoginAgent : public IOCP
+class LoginAgent
 {
 public:
     LoginAgent();
@@ -13,10 +13,15 @@ public:
     HRESULT Start();
     HRESULT Stop();
 
-    virtual HRESULT OnRecv(IOCP_CONNECTION* pConn);
-    virtual HRESULT OnSend(IOCP_CONNECTION* pConn);
+    HRESULT GetServerName(int nIndex, LPTSTR lpszName, int nSize)
+    {
+        return StringCchCopy(lpszName, nSize, vecServerGroup_[nIndex].name);
+    }
 
-
+    WORD GetPort()
+    {
+        return wPort_;
+    }
 private:
     HRESULT InitializeDefaultConfig();
     HRESULT ReadConfig(LPCTSTR lpszCfgFile);

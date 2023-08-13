@@ -15,7 +15,7 @@ public:
     }
 
     virtual HRESULT ProcessEvent(size_t len);
-
+    virtual HRESULT OnClose();
 private:
     BYTE* bufSend_;
     size_t bufSendLen_;
@@ -40,6 +40,8 @@ public:
     HRESULT NotifyEvent(EVENT_ID eid, WPARAM wParam, LPARAM lParam);
 
 
+private:
+    DWORD dwUserCount_ = 0;
     virtual HRESULT OnConnect(Session** ppSession)
     {
         HRESULT hr = S_OK;
@@ -52,6 +54,8 @@ public:
         }
 
         *ppSession = pSession;
+
+        NotifyEvent(EVENT_ID_USER_CONNECTED, 0, 0);
 
         return hr;
     }

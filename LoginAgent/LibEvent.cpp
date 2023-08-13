@@ -185,6 +185,9 @@ void LibEvent::conn_writecb(struct bufferevent* bev, void* user_data)
 
 void LibEvent::conn_eventcb(struct bufferevent* bev, short events, void* user_data)
 {
+
+    Session* pSession = (Session*)user_data;
+
     if (events & BEV_EVENT_EOF) {
         printf("Connection closed.\n");
     }
@@ -197,6 +200,8 @@ void LibEvent::conn_eventcb(struct bufferevent* bev, short events, void* user_da
     /* None of the other events can happen here, since we haven't enabled
      * timeouts */
     bufferevent_free(bev);
+
+    pSession->OnClose();
 }
 
 void LibEvent::signal_cb(evutil_socket_t sig, short events, void* user_data)

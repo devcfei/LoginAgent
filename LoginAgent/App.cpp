@@ -224,13 +224,29 @@ HRESULT App::NotifyEvent(EVENT_ID eid, WPARAM wParam, LPARAM lParam)
 
         break;
     }
-    case EVENT_ID_UPDATE_USERCOUNT:
+    case EVENT_ID_USER_CONNECTED:
     {
         HWND hWnd = GetDlgItem(hDlg_, IDC_STATIC_USERCOUNT);
         TCHAR szText[16];
-        StringCchPrintf(szText, 16, _T("%d"), wParam);
+        DWORD cnt= InterlockedIncrement(&dwUserCount_);
+
+        StringCchPrintf(szText, 16, _T("%d"), cnt);
         SetWindowText(hWnd, szText);
-    
+
+
+        break;
+    }
+
+    case EVENT_ID_USER_DISCONNECTED:
+    {
+        HWND hWnd = GetDlgItem(hDlg_, IDC_STATIC_USERCOUNT);
+        TCHAR szText[16];
+        DWORD cnt = InterlockedDecrement(&dwUserCount_);
+        StringCchPrintf(szText, 16, _T("%d"), cnt);
+        SetWindowText(hWnd, szText);
+
+        OnDisconnect((Session*)wParam);
+
         break;
     }
     default:
@@ -301,3 +317,11 @@ HRESULT LoginAgentSession::ProcessEvent(size_t len)
 
     return S_OK;
 }
+
+HRESULT LoginAgentSession::OnClose()
+{
+    GetApp()->NotifyEvent(EVENT_ID_USER_DISCONNECTED, WPARAM(this), 0);
+    //delete this;
+    return S_OK;
+}
+

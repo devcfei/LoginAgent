@@ -27,6 +27,11 @@ public:
         return S_OK;
     }
 
+    virtual HRESULT OnClose()
+    {
+        return S_OK;
+    }
+
     void* GetBuffer() { return pdata_; }
     size_t GetBufferSize() { return len_; }
 
@@ -36,6 +41,8 @@ public:
         bufferevent_write(bev, pdata, len);
         return hr;        
     }
+
+    
 
 protected:
     BYTE* pdata_;

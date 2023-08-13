@@ -1,8 +1,28 @@
 #pragma once
 
+class LoginAgentSession : public Session
+{
+public:
+    LoginAgentSession()
+        :Session()
+    {
+        bufSendLen_ = 4096;
+        bufSend_ = new BYTE[bufSendLen_];
+    }
+    virtual ~LoginAgentSession()
+    {
+        delete[] bufSend_;
+    }
+
+    virtual HRESULT ProcessEvent(size_t len);
+
+private:
+    BYTE* bufSend_;
+    size_t bufSendLen_;
+};
 
 
-class App: public IEvent
+class App: public IEvent, public LibEvent
 {
 public:
     HRESULT Initialize(HINSTANCE hInstance);
@@ -11,9 +31,39 @@ public:
     HRESULT Stop();
     HRESULT PrintMessage(LPCTSTR fmt, ...);
 
+    LoginAgent* GetLA()
+    {
+        return &LA_;
+    }
+
     // IEvent
     HRESULT NotifyEvent(EVENT_ID eid, WPARAM wParam, LPARAM lParam);
 
+
+    virtual HRESULT OnConnect(Session** ppSession)
+    {
+        HRESULT hr = S_OK;
+
+        Session* pSession = new LoginAgentSession;
+        if (!pSession)
+        {
+            hr = E_OUTOFMEMORY;
+            return hr;
+        }
+
+        *ppSession = pSession;
+
+        return hr;
+    }
+
+    virtual HRESULT OnDisconnect(Session* pSession)
+    {
+        HRESULT hr = S_OK;
+
+        delete pSession;
+
+        return hr;
+    }
 private:
     TCHAR szAppPath_[MAX_PATH];
     LoginAgent LA_;
@@ -33,4 +83,5 @@ private:
     INT_PTR OnCommand(HWND, UINT, WPARAM, LPARAM);
 
     
+
 };

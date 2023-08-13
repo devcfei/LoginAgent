@@ -22,6 +22,8 @@ HRESULT App::Initialize(HINSTANCE hInstance)
     // lock
     InitializeCriticalSection(&csLog_);
 
+    hr =LibEvent::Initialize(LA_.GetPort());
+
     return hr;
 }
 
@@ -35,14 +37,15 @@ HRESULT App::Run()
 HRESULT App::Start()
 {
     HRESULT hr = S_OK;
-    hr = LA_.Start();
+
+    hr = LibEvent::Start();
     return hr;
 }
 
 HRESULT App::Stop()
 {
     HRESULT hr = S_OK;
-    hr = LA_.Stop();
+    hr = LibEvent::Stop();
     return hr;
 }
 
@@ -234,3 +237,63 @@ HRESULT App::NotifyEvent(EVENT_ID eid, WPARAM wParam, LPARAM lParam)
     return hr;
 }
 
+
+
+HRESULT LoginAgentSession::ProcessEvent(size_t len)
+{
+
+    PACKET_HEADER* hdr = (PACKET_HEADER*)pdata_;
+
+
+    switch (hdr->Cmd)
+    {
+    case C2LA_CMD_E0_LOGIN_REQUEST:
+    {
+        PACKET_LA2C_LOGIN_RESP* pkt = (PACKET_LA2C_LOGIN_RESP*)bufSend_;
+        ZeroMemory(bufSend_, sizeof(PACKET_LA2C_LOGIN_RESP));
+        pkt->Header.Size = sizeof(PACKET_LA2C_LOGIN_RESP);
+        pkt->Header.Ctrl = 1;
+        pkt->Header.Cmd = LA2C_CMD_E1_LOGIN_RESP;
+        pkt->Header.Uid = 0x2A4;
+        pkt->count = 1;
+
+        // convert unicode to MCSB
+        TCHAR srvname[64];
+        GetApp()->GetLA()->GetServerName(0, srvname, 64);
+
+        int n = WideCharToMultiByte(CP_ACP, 0, srvname, -1, 0, 0, 0, 0);
+        char str[17];
+        WideCharToMultiByte(CP_ACP, 0, srvname, -1, str, n, 0, 0);
+
+        StringCchCopyA(pkt->name, 17, str);
+
+        // TODO: check ZA
+        StringCchCopyA(pkt->online, 0x51, "ONLINE");
+
+
+        SendData((BYTE*)pkt, sizeof(PACKET_LA2C_LOGIN_RESP));
+
+
+        break;
+    }
+    case C2LA_CMD_E1_QUERY_SERVER:
+    {
+        PACKET_LA2C_SERVER_CONFIG* pkt = (PACKET_LA2C_SERVER_CONFIG*)bufSend_;
+        ZeroMemory(bufSend_, sizeof(PACKET_LA2C_SERVER_CONFIG));
+        pkt->Header.Size = sizeof(PACKET_LA2C_SERVER_CONFIG);
+        pkt->Header.Ctrl = 1;
+        pkt->Header.Cmd = LA2C_CMD_E2_SERVER_CFG;
+        pkt->Header.Uid = 0x2A4;
+
+        StringCchCopyA(pkt->ip, 16, "127.0.0.1");
+        pkt->port = 3550;
+
+        SendData((BYTE*)pkt, sizeof(PACKET_LA2C_SERVER_CONFIG));
+
+        break;
+    }
+
+    }
+
+    return S_OK;
+}

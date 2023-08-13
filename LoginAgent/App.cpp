@@ -24,6 +24,7 @@ HRESULT App::Initialize(HINSTANCE hInstance)
 
     hr =LibEvent::Initialize(LA_.GetPort());
 
+
     return hr;
 }
 
@@ -39,6 +40,9 @@ HRESULT App::Start()
     HRESULT hr = S_OK;
 
     hr = LibEvent::Start();
+
+    NotifyEvent(EVENT_ID_LISTEN_SUCCESS, MAKEWPARAM(LA_.GetPort(), 0), 0);
+
     return hr;
 }
 

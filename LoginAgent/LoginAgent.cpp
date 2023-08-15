@@ -68,7 +68,7 @@ HRESULT LoginAgent::InitializeDefaultConfig()
     nVerLow_ = 700;
 
     nMode_ = 0;
-    wPort_ = 3550;
+    wPort_ = 3551;
     wZAPort_ = 3200;
     nStartID_ = 345856;
     nHashType_ = 0;
@@ -108,7 +108,7 @@ HRESULT LoginAgent::ReadConfig(LPCTSTR lpszCfgFile)
 
     // [STARTUP]
     nMode_ = GetPrivateProfileInt(_T("STARTUP"), _T("MODE"), 0, lpszCfgFile);
-    wPort_ = GetPrivateProfileInt(_T("STARTUP"), _T("PORT"), 3550, lpszCfgFile);
+    wPort_ = GetPrivateProfileInt(_T("STARTUP"), _T("PORT"), 3551, lpszCfgFile);
     wZAPort_ = GetPrivateProfileInt(_T("STARTUP"), _T("ZONEAGENTLISTENPORT"), 3200, lpszCfgFile);
     nStartID_ = GetPrivateProfileInt(_T("STARTUP"), _T("STARTID"), 345856, lpszCfgFile);
     nHashType_ = GetPrivateProfileInt(_T("STARTUP"), _T("HASHTYPE"), 0, lpszCfgFile);
